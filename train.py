@@ -28,9 +28,9 @@ torch.manual_seed(seed)
 # Hyperparameters etc. 
 LEARNING_RATE = 2e-5
 DEVICE = "cuda" if torch.cuda.is_available else "cpu"
-BATCH_SIZE = 16 # 64 in original paper but I don't have that much vram, grad accum?
-WEIGHT_DECAY = 0
-EPOCHS = 1000
+BATCH_SIZE = 64 # 64 in original paper but I don't have that much vram, grad accum?
+WEIGHT_DECAY = 0.0005
+EPOCHS = 135
 NUM_WORKERS = 2
 PIN_MEMORY = True
 LOAD_MODEL = False
