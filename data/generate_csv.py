@@ -3,7 +3,7 @@ import csv
 
 read_train = open("train.txt", "r").readlines()
 
-with open("train.csv", mode="w", newline="") as train_file:
+with open("data/train.csv", mode="w", newline="") as train_file:
     for line in read_train:
         image_file = line.split("/")[-1].replace("\n", "")
         text_file = image_file.replace(".jpg", ".txt")
@@ -13,7 +13,7 @@ with open("train.csv", mode="w", newline="") as train_file:
 
 read_train = open("test.txt", "r").readlines()
 
-with open("test.csv", mode="w", newline="") as train_file:
+with open("data/test.csv", mode="w", newline="") as train_file:
     for line in read_train:
         image_file = line.split("/")[-1].replace("\n", "")
         text_file = image_file.replace(".jpg", ".txt")
