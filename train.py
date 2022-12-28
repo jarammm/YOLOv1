@@ -142,6 +142,7 @@ def main():
 
         train_fn(train_loader, model, optimizer, loss_fn)
 
+    train_fn(test_loader, model, optimizer, loss_fn)
 
 if __name__ == "__main__":
     main()
