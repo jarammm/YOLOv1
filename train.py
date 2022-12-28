@@ -142,7 +142,14 @@ def main():
 
         train_fn(train_loader, model, optimizer, loss_fn)
 
-    train_fn(test_loader, model, optimizer, loss_fn)
+    pred_boxes, target_boxes = get_bboxes(
+            test_loader, model, iou_threshold=0.5, threshold=0.4
+        )
+
+    mean_avg_prec = mean_average_precision(
+            pred_boxes, target_boxes, iou_threshold=0.5, box_format="midpoint"
+        )
+    print(f"Test mAP: {mean_avg_prec}")
 
 if __name__ == "__main__":
     main()
