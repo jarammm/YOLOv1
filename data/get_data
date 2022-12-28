@@ -34,7 +34,7 @@ cp 2007_test.txt test.txt
 mkdir old_txt_files
 mv 2007* 2012* old_txt_files/
 
-python generate_csv.py
+python data/generate_csv.py
 
 mkdir data
 mkdir data/images
