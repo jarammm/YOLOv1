@@ -111,15 +111,6 @@ def main():
     best_mean_avg_prec = 0
 
     for epoch in range(EPOCHS):
-        # for x, y in train_loader:
-        #    x = x.to(DEVICE)
-        #    for idx in range(8):
-        #        bboxes = cellboxes_to_boxes(model(x))
-        #        bboxes = non_max_suppression(bboxes[idx], iou_threshold=0.5, threshold=0.4, box_format="midpoint")
-        #        plot_image(x[idx].permute(1,2,0).to("cpu"), bboxes)
-
-        #    import sys
-        #    sys.exit()
 
         pred_boxes, target_boxes = get_bboxes(
             train_loader, model, iou_threshold=0.5, threshold=0.4
@@ -141,12 +132,18 @@ def main():
 
         train_fn(train_loader, model, optimizer, loss_fn)
 
+
+    # test start
+
+    # load pretrained model
     load_checkpoint(torch.load(LOAD_MODEL_FILE), model, optimizer)
     
+    # show test result image & scoring
     pred_boxes, target_boxes = get_bboxes(
-            test_loader, model, iou_threshold=0.5, threshold=0.4
+            test_loader, model, iou_threshold=0.5, threshold=0.4, istest=True
         )
 
+    # test prediction scoring
     mean_avg_prec = mean_average_precision(
             pred_boxes, target_boxes, iou_threshold=0.5, box_format="midpoint"
         )
