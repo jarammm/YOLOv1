@@ -2,6 +2,7 @@
 Main file for training Yolo model on Pascal VOC dataset
 """
 
+import time
 import torch
 import torchvision.transforms as transforms
 import torch.optim as optim
@@ -33,8 +34,7 @@ WEIGHT_DECAY = 0.0005
 EPOCHS = 20
 NUM_WORKERS = 2
 PIN_MEMORY = True
-LOAD_MODEL = False
-LOAD_MODEL_FILE = "overfit.pth.tar"
+LOAD_MODEL_FILE = "yolo.pth"
 IMG_DIR = "data/images"
 LABEL_DIR = "data/labels"
 
@@ -79,9 +79,6 @@ def main():
     )
     loss_fn = YoloLoss()
 
-    if LOAD_MODEL:
-        load_checkpoint(torch.load(LOAD_MODEL_FILE), model, optimizer)
-
     train_dataset = VOCDataset(
         "data/train.csv",
         transform=transform,
@@ -111,6 +108,8 @@ def main():
         drop_last=True,
     )
 
+    best_mean_avg_prec = 0
+
     for epoch in range(EPOCHS):
         # for x, y in train_loader:
         #    x = x.to(DEVICE)
@@ -131,17 +130,19 @@ def main():
         )
         print(f"Train mAP: {mean_avg_prec}")
 
-        #if mean_avg_prec > 0.9:
-        #    checkpoint = {
-        #        "state_dict": model.state_dict(),
-        #        "optimizer": optimizer.state_dict(),
-        #    }
-        #    save_checkpoint(checkpoint, filename=LOAD_MODEL_FILE)
-        #    import time
-        #    time.sleep(10)
+        if mean_avg_prec > best_mean_avg_prec:
+           best_mean_avg_prec = mean_avg_prec
+           checkpoint = {
+               "state_dict": model.state_dict(),
+               "optimizer": optimizer.state_dict(),
+           }
+           save_checkpoint(checkpoint, filename=LOAD_MODEL_FILE)
+           time.sleep(10)
 
         train_fn(train_loader, model, optimizer, loss_fn)
 
+    load_checkpoint(torch.load(LOAD_MODEL_FILE), model, optimizer)
+    
     pred_boxes, target_boxes = get_bboxes(
             test_loader, model, iou_threshold=0.5, threshold=0.4
         )

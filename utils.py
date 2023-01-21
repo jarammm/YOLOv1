@@ -332,7 +332,7 @@ def cellboxes_to_boxes(out, S=7):
 
     return all_bboxes
 
-def save_checkpoint(state, filename="my_checkpoint.pth.tar"):
+def save_checkpoint(state, filename="checkpoint.pth"):
     print("=> Saving checkpoint")
     torch.save(state, filename)
 
