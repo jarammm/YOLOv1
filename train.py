@@ -34,7 +34,7 @@ WEIGHT_DECAY = 0.0005
 EPOCHS = 20
 NUM_WORKERS = 2
 PIN_MEMORY = True
-LOAD_MODEL_FILE = "yolo.h5"
+LOAD_MODEL_FILE = "model_data/yolo_weights.h5"
 IMG_DIR = "data/images"
 LABEL_DIR = "data/labels"
 
@@ -131,11 +131,7 @@ def main():
            time.sleep(10)
 
         train_fn(train_loader, model, optimizer, loss_fn)
-
-
-    # save checkpoint
-
-
+        
     # test start
 
     # load pretrained model

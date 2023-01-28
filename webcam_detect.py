@@ -15,7 +15,6 @@ from yolo3.utils import image_preporcess
 
 class YOLO(object):
     _defaults = {
-        #"model_path": 'logs/trained_weights_final.h5',
         "model_path": 'model_data/yolo_weights.h5',
         "anchors_path": 'model_data/yolo_anchors.txt',
         "classes_path": 'model_data/coco_classes.txt',
