@@ -4,20 +4,28 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 import cv2
 import time
 
-
 import numpy as np
+
+#TODO : need to modify for torch version
 from keras import backend as K
 from keras.models import load_model
 from keras.layers import Input
 
-from yolo3.model import yolo_eval, yolo_body, tiny_yolo_body
+from yolo3.model import yolo_eval #TODO : need to modify for keras yolo3 -> torch yolo1
 from yolo3.utils import image_preporcess
+
+import torch
+from model import Yolov1
+
+DEVICE = "cuda" if torch.cuda.is_available else "cpu"
+LOAD_MODEL_FILE = "model_data/yolo_weights.h5"
+
 
 class YOLO(object):
     _defaults = {
         "model_path": 'model_data/yolo_weights.h5',
-        "anchors_path": 'model_data/yolo_anchors.txt',
-        "classes_path": 'model_data/coco_classes.txt',
+        "anchors_path": 'model_data/yolo_anchors.txt',  #TODO : download yolo_anchors.txt
+        "classes_path": 'model_data/coco_classes.txt',  #TODO : download coco_classes.txt
         "score" : 0.3,
         "iou" : 0.45,
         "model_image_size" : (416, 416),
@@ -58,19 +66,8 @@ class YOLO(object):
         assert model_path.endswith('.h5'), 'Keras model or weights must be a .h5 file.'
 
         # Load model, or construct model and load weights.
-        num_anchors = len(self.anchors)
-        num_classes = len(self.class_names)
-        is_tiny_version = num_anchors==6 # default setting
-        try:
-            self.yolo_model = load_model(model_path, compile=False)
-        except:
-            self.yolo_model = tiny_yolo_body(Input(shape=(None,None,3)), num_anchors//2, num_classes) \
-                if is_tiny_version else yolo_body(Input(shape=(None,None,3)), num_anchors//3, num_classes)
-            self.yolo_model.load_weights(self.model_path) # make sure model, anchors and classes match
-        else:
-            assert self.yolo_model.layers[-1].output_shape[-1] == \
-                num_anchors/len(self.yolo_model.output) * (num_classes + 5), \
-                'Mismatch between model and given anchor and class sizes'
+        self.yolo_model = Yolov1(split_size=7, num_boxes=2, num_classes=20).to(DEVICE)
+        self.yolo_model.load_state_dict(torch.load(LOAD_MODEL_FILE)["state_dict"])
 
         print('{} model, anchors, and classes loaded.'.format(model_path))
 
@@ -86,6 +83,7 @@ class YOLO(object):
 
         # Generate output tensor targets for filtered bounding boxes.
         self.input_image_shape = K.placeholder(shape=(2, ))
+        #TODO YOLO_EVAL : KERAS YOLO3 -> TORCH YOLO1
         boxes, scores, classes = yolo_eval(self.yolo_model.output, self.anchors,
                 len(self.class_names), self.input_image_shape,
                 score_threshold=self.score, iou_threshold=self.iou)
@@ -151,11 +149,11 @@ class YOLO(object):
         self.sess.close()
 
     def detect_img(self, image):
-        #image = cv2.imread(image, cv2.IMREAD_COLOR)
+        image = cv2.imread(image, cv2.IMREAD_COLOR)
         original_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        original_image_color = cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB)
+        # original_image_color = cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB)
         
-        r_image, ObjectsList = self.detect_image(original_image_color)
+        r_image, ObjectsList = self.detect_image(original_image)
         return r_image, ObjectsList
 
     
