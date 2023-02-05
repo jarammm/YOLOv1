@@ -7,9 +7,8 @@ import time
 import numpy as np
 
 #TODO : need to modify for torch version
-from keras import backend as K
-from keras.models import load_model
-from keras.layers import Input
+# https://github.com/shevious/keras-yolo4/blob/tensorflow2/predict_video.py
+# https://github.com/pythonlessons/YOLOv3-object-detection-tutorial/blob/master/YOLOv3-custom-training/webcam_detect.py
 
 from yolo3.model import yolo_eval #TODO : need to modify for keras yolo3 -> torch yolo1
 from yolo3.utils import image_preporcess
@@ -44,7 +43,6 @@ class YOLO(object):
         self.__dict__.update(kwargs) # and update with user overrides
         self.class_names = self._get_class()
         self.anchors = self._get_anchors()
-        self.sess = K.get_session()
         self.boxes, self.scores, self.classes = self.generate()
 
     def _get_class(self):
@@ -82,7 +80,7 @@ class YOLO(object):
         np.random.shuffle(self.colors)  # Shuffle colors to decorrelate adjacent classes.
 
         # Generate output tensor targets for filtered bounding boxes.
-        self.input_image_shape = K.placeholder(shape=(2, ))
+        self.input_image_shape = torch.empty(2,)
         #TODO YOLO_EVAL : KERAS YOLO3 -> TORCH YOLO1
         boxes, scores, classes = yolo_eval(self.yolo_model.output, self.anchors,
                 len(self.class_names), self.input_image_shape,
@@ -95,7 +93,7 @@ class YOLO(object):
             assert self.model_image_size[1]%32 == 0, 'Multiples of 32 required'
             boxed_image = image_preporcess(np.copy(image), tuple(reversed(self.model_image_size)))
             image_data = boxed_image
-
+        #TODO : KERAS -> TORCH => need to fix utils.py
         out_boxes, out_scores, out_classes = self.sess.run(
             [self.boxes, self.scores, self.classes],
             feed_dict={
@@ -107,7 +105,6 @@ class YOLO(object):
         #print('Found {} boxes for {}'.format(len(out_boxes), 'img'))
 
         thickness = (image.shape[0] + image.shape[1]) // 600
-        fontScale=1
         ObjectsList = []
         
         for i, c in reversed(list(enumerate(out_classes))):
@@ -145,13 +142,9 @@ class YOLO(object):
 
         return image, ObjectsList
 
-    def close_session(self):
-        self.sess.close()
-
     def detect_img(self, image):
         image = cv2.imread(image, cv2.IMREAD_COLOR)
         original_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        # original_image_color = cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB)
         
         r_image, ObjectsList = self.detect_image(original_image)
         return r_image, ObjectsList
@@ -197,4 +190,3 @@ if __name__=="__main__":
 
     cap.release()
     cv2.destroyAllWindows()
-    yolo.close_session()
