@@ -1,1 +1,6 @@
-*.h5
+VOC2012test/
+data/
+model/
+
+__pycache__/
+
