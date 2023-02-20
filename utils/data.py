@@ -6,7 +6,7 @@ import random
 from torch.utils import data
 
 
-__all__ = ['VOCDataset', 'VOCRawTestDataset', 'load_data_voc']
+__all__ = ['VOCDataset', 'VOCRawTestDataset', 'load_data_voc', 'load_test_data_voc']
 
 
 categories = ['aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car', 'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorbike', 'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor']
@@ -192,3 +192,17 @@ def load_data_voc(batch_size, num_workers=0, persistent_workers=False, download=
 		data.DataLoader(VOCRawTestDataset(voc2012_val), 
 			batch_size, shuffle=test_shuffle, num_workers=num_workers, persistent_workers=persistent_workers)
 	)
+
+
+def load_test_data_voc(batch_size, num_workers=0, persistent_workers=False, download=False, test_shuffle=True):
+	"""
+	Loads the Pascal VOC dataset.
+	:return: train_iter, test_iter, test_raw_iter
+	"""
+	# Load the dataset
+	trans = [
+		torchvision.transforms.ToTensor(),
+	]
+	trans = torchvision.transforms.Compose(trans)
+	voc2012_val = torchvision.datasets.VOCDetection(root='../data/VOCDetection/', year='2012', image_set='val', download=download, transform=trans)
+	return data.DataLoader(VOCRawTestDataset(voc2012_val), batch_size, shuffle=test_shuffle, num_workers=num_workers, persistent_workers=persistent_workers)

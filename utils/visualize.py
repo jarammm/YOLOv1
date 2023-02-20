@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 from IPython import display
 
 
-__all__ = ['draw_box', 'draw_detection_result', 'draw_ground_truth', 'PIL_to_cv2', 'cv2_to_PIL', 'tensor_to_PIL', 'tensor_to_cv2', 'Animator', 'draw_precision_recall']
+__all__ = ['draw_box', 'draw_detection_result', 'draw_ground_truth', 'PIL_to_cv2', 'cv2_to_PIL', 'tensor_to_PIL', 'tensor_to_cv2', 'Animator', 'draw_precision_recall', 'calc_iou']
 
 
 categories = ['aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car', 'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorbike', 'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor']
@@ -68,6 +68,17 @@ def draw_box(img, x, y, w, h, score, category):
 		cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1, 8)
 	
 	return img
+
+
+def calc_iou(pred):
+
+	pred = pred.reshape((-1, 30))
+	iou_max = [0]*30
+	for i in range(pred.shape[0]):
+		iou = pred[i][4]
+		if max(iou_max) < max(iou):
+			iou_max = iou
+	return iou_max
 
 
 def draw_detection_result(img, pred, raw=False, thres=0.1):
