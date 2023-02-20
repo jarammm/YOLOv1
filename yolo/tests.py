@@ -35,7 +35,8 @@ def test_mAP_IoU(net: torch.nn.Module, test_iter_raw: data.DataLoader, device: t
 			for yhat, yraw in zip(YHat, YRaw):
 				yhat = nms(yhat)
 				calc.add_image_data(yhat.cpu(), yraw)
-				calc_iou_avg += calc_iou(yhat)
+				calc_iou_avg += max(yhat)
+				# calc_iou_avg += calc_iou(yhat)
 				cnt += 1
 
 		print("Test VOC mAP:", calc.calculate_VOCmAP())
