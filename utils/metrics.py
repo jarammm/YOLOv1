@@ -37,17 +37,6 @@ def compare_metrics(metrics1: CalculationMetrics, metrics2: CalculationMetrics):
 
 
 class ObjectDetectionMetricsCalculator():
-	# data
-	# [       # classes
-	#   {
-	#      "data": [     # data
-	#         <CalculationMetrics>
-	#      ],
-	#      "detection": <int>,
-	#      "truth": <int>
-	#   }
-	# ]
-
 	def __init__(self, num_classes: int, confidence_thres: float):
 		"""ObjectDetectionMetricsCalculator Initialization
 
@@ -238,6 +227,48 @@ class ObjectDetectionMetricsCalculator():
 
 		AP /= len(intp_pts)
 		return AP
+
+
+	def IoU(self, iou_thres: float, class_idx: int) -> list:
+		"""Calculate Precision-Recall Data according to IoU threshold
+
+		Args:
+			iou_thres (float): IoU threshold
+			class_idx (int): Class Index
+
+		Returns:
+			list: `[{"precision": <precision>, "recall": <recall>}]`
+		"""
+		iou = 0
+		truth_cnt = self.data[class_idx]['truth']
+		data = sorted(self.data[class_idx]['data'], key=cmp_to_key(compare_metrics))
+		for i, metrics in enumerate(data):
+			if metrics.IoU >= iou_thres and not metrics.mustbe_FP and not metrics.is_difficult:
+				iou += metrics.IoU
+
+		return iou/truth_cnt
+
+
+	def calculate_IoU(self, iou_thres: float, itpl_option: InterpolationMethod) -> float:
+		"""calculate mAP using given IoU threshold and interpolation method
+
+		Args:
+			iou_thres (float): IoU threshold
+			itpl_option (InterpolationMethod): Interpolation Method
+
+		Returns:
+			float: IoU
+		"""
+		iou = 0
+		for c in range(len(self.data)):
+			iou += self.IoU(iou_thres, c)
+		iou /= len(self.data)
+
+		return iou
+
+
+	def calculate_VOCIoU(self) -> float:
+		return self.calculate_IoU(0.5, InterpolationMethod.Interpolation_11)
 
 
 	def calculate_mAP(self, iou_thres: float, itpl_option: InterpolationMethod) -> float:

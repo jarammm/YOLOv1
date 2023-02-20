@@ -28,18 +28,15 @@ def test_mAP_IoU(net: torch.nn.Module, test_iter_raw: data.DataLoader, device: t
 		for i, (X, YRaw) in enumerate(test_iter_raw):
 			print("Batch %d / %d" % (i, len(test_iter_raw)))
 			display.clear_output(wait=True)
-			calc_iou_avg = 0
-			cnt = 0
 			X = X.to(device)
 			YHat = net(X)
 			for yhat, yraw in zip(YHat, YRaw):
 				yhat = nms(yhat)
 				calc.add_image_data(yhat.cpu(), yraw)
-				print(yhat.shape)
-				calc_iou_avg += max(yhat[0])
-				# calc_iou_avg += calc_iou(yhat)
-				cnt += 1
+			for cat in calc.data:
+				for i in cat['data']:
+					i.IoU
 
 		print("Test VOC mAP:", calc.calculate_VOCmAP())
-		print("Test IoU:", calc_iou_avg/cnt)
+		print("Test IoU:", calc.calculate_VOCIoU())
 
